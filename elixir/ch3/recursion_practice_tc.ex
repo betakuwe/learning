@@ -9,7 +9,11 @@ defmodule RecursionPracticeTC do
 
   def range(from, to), do: do_range([], from, to)
   defp do_range(list, from, from), do: [from | list]
-  defp do_range(list, from, to) when from < to, do: do_range([to | list], from, to - 1)
+
+  defp do_range(list, from, to) when from < to do
+    do_range([to | list], from, to - 1)
+  end
+
   defp do_range(list, from, to), do: do_range([to | list], from, to + 1)
 
   def positive(list), do: do_positive([], list)
