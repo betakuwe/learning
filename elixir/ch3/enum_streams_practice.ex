@@ -25,6 +25,24 @@ defmodule EnumStreamsPractice do
     end
   end
 
+  def longest_line2!(path) do
+    {_max_len, lines} =
+      for line <- File.stream!(path),
+          len = String.length(line),
+          reduce: {0, []} do
+        {max_len, _lines} when len > max_len ->
+          {len, [line]}
+
+        {max_len, lines} when len == max_len ->
+          {len, [line | lines]}
+
+        no_change ->
+          no_change
+      end
+
+    lines
+  end
+
   def words_per_line!(path) do
     for line <- File.stream!(path) do
       length(String.split(line))
