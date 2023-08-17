@@ -55,12 +55,31 @@ defmodule TodoList.CsvImporter do
   @spec import!(String) :: TodoList
   def import!(path) do
     for line <- File.stream!(path) do
-      String.trim_trailing(line)
-      |> String.split(",")
-      |> (fn [date_string, title_string] ->
-            %{date: Date.from_iso8601!(date_string), title: title_string}
-          end).()
+      [date_string, title_string] =
+        String.trim_trailing(line)
+        |> String.split(",")
+
+      %{date: Date.from_iso8601!(date_string), title: title_string}
     end
     |> TodoList.new()
   end
+end
+
+defimpl String.Chars, for: TodoList do
+  def to_string(_) do
+    "#TodoList"
+  end
+end
+
+defimpl Collectable, for: TodoList do
+  def into(original) do
+    {original, &into_callback/2}
+  end
+
+  defp into_callback(todo_list, {:cont, entry}) do
+    TodoList.add_entry(todo_list, entry)
+  end
+
+  defp into_callback(todo_list, :done), do: todo_list
+  defp into_callback(_todo_list, :halt), do: :ok
 end
