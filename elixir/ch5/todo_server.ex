@@ -1,18 +1,18 @@
 defmodule TodoServer do
-  @spec start :: pid
+  @spec start :: boolean
   def start do
     spawn(fn -> loop(TodoList.new()) end)
+    |> Process.register(:server_pid)
   end
 
-  @spec add_entry(TodoServer, TodoList.entry()) :: TodoServer
-  def add_entry(todo_server, new_entry) do
-    send(todo_server, {:add_entry, new_entry})
-    todo_server
+  @spec add_entry(TodoList.entry()) :: {:add_entry, TodoList.entry()}
+  def add_entry(new_entry) do
+    send(:server_pid, {:add_entry, new_entry})
   end
 
-  @spec entries(TodoServer, Date) :: TodoList.entries() | {:error, :timeout}
-  def entries(todo_server, date) do
-    send(todo_server, {:entries, self(), date})
+  @spec entries(Date) :: TodoList.entries() | {:error, :timeout}
+  def entries(date) do
+    send(:server_pid, {:entries, self(), date})
 
     receive do
       {:todo_entries, entries} -> entries
@@ -21,16 +21,15 @@ defmodule TodoServer do
     end
   end
 
-  @spec update_entry(TodoServer, TodoList.id(), TodoList.updater()) :: TodoServer
-  def update_entry(todo_server, id, updater_fun) do
-    send(todo_server, {:update_entry, id, updater_fun})
-    todo_server
+  @spec update_entry(TodoList.id(), TodoList.updater()) ::
+          {:update_entry, TodoList.id(), TodoList.updater()}
+  def update_entry(id, updater_fun) do
+    send(:server_pid, {:update_entry, id, updater_fun})
   end
 
-  @spec delete_entry(TodoServer, TodoList.id()) :: TodoServer
-  def delete_entry(todo_server, id) do
-    send(todo_server, {:delete_entry, id})
-    todo_server
+  @spec delete_entry(TodoList.id()) :: {:delete_entry, TodoList.id()}
+  def delete_entry(id) do
+    send(:server_pid, {:delete_entry, id})
   end
 
   @spec loop(TodoList) :: any
