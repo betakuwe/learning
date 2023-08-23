@@ -1,4 +1,5 @@
 defmodule ServerProcess do
+  @spec start(atom) :: pid
   def start(callback_module) do
     spawn(fn ->
       initial_state = callback_module.init()
@@ -6,6 +7,7 @@ defmodule ServerProcess do
     end)
   end
 
+  @spec call(pid, any) :: any
   def call(server_pid, request) do
     send(server_pid, {:call, request, self()})
 
@@ -14,10 +16,12 @@ defmodule ServerProcess do
     end
   end
 
+  @spec cast(pid, any) :: {:cast, any}
   def cast(server_pid, request) do
     send(server_pid, {:cast, request})
   end
 
+  @spec loop(atom, any) :: any
   defp loop(callback_module, current_state) do
     receive do
       {:call, request, caller} ->

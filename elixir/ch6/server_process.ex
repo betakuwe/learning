@@ -1,4 +1,5 @@
 defmodule ServerProcess do
+  @spec start(atom) :: pid
   def start(callback_module) do
     spawn(fn ->
       initial_state = callback_module.init()
@@ -6,6 +7,7 @@ defmodule ServerProcess do
     end)
   end
 
+  @spec call(pid, any) :: any
   def call(server_pid, request) do
     send(server_pid, {request, self()})
 
@@ -14,6 +16,7 @@ defmodule ServerProcess do
     end
   end
 
+  @spec loop(atom, any) :: any
   defp loop(callback_module, current_state) do
     receive do
       {request, caller} ->
@@ -29,17 +32,17 @@ end
 
 defmodule KeyValueStore do
   def start do
-  	ServerProcess.start(KeyValueStore)
+    ServerProcess.start(KeyValueStore)
   end
 
   def put(pid, key, value) do
-  	ServerProcess.call(pid, {:put, key, value})
+    ServerProcess.call(pid, {:put, key, value})
   end
 
   def get(pid, key) do
-  	ServerProcess.call(pid, {:get, key})
+    ServerProcess.call(pid, {:get, key})
   end
-  
+
   def init do
     %{}
   end
