@@ -115,6 +115,7 @@ defmodule TodoList do
 
   @spec delete_entry(TodoList, id) :: TodoList
   def delete_entry(todo_list, id) do
-    pop_in(todo_list, [Access.key(:entries), id])
+    {_deleted_entry, new_todo_list} = pop_in(todo_list, [Access.key(:entries), id])
+    new_todo_list
   end
 end

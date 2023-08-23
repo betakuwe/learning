@@ -26,8 +26,8 @@ defmodule TodoList do
     |> update_in([Access.key(:next_id)], &(&1 + 1))
   end
 
-  def add_entry(_, _) do
-    {:error, :invalid_entry}
+  def add_entry(todo_list, _) do
+    todo_list
   end
 
   @spec entries(TodoList, Date) :: [entry]
